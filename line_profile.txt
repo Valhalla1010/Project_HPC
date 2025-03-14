@@ -1,0 +1,127 @@
+// line_profile for gradient function
+
+Timer unit: 1e-06 s
+
+Total time: 317.14 s
+File: artificialneuralnetwork.py
+Function: gradient at line 96
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    96                                           @profile
+    97                                           def gradient(theta, input_layer_size, hidden_layer_size, num_labels, X, y, lmbda):
+   111                                                  # unflatten theta
+   112      1108      11525.6     10.4      0.0         Theta1, Theta2 = reshape(theta, input_layer_size, hidden_layer_size, num_labels)      
+   113
+   114                                                  # number of training values
+   115      1108       1569.4      1.4      0.0         m = len(y)     
+   116
+   117                                                  # Backpropagation: calculate the gradients Theta1_grad and Theta2_grad:
+   118
+   119      1108       6399.1      5.8      0.0         Delta1 = np.zeros((hidden_layer_size,input_layer_size+1))
+   120      1108       1586.1      1.4      0.0         Delta2 = np.zeros((num_labels,hidden_layer_size+1))
+   121
+   122   2992708    1497917.7      0.5      0.5         for t in range(m):
+   123
+   124                                                          # forward
+   125   2991600    5986217.7      2.0      1.9                 a1 = X[t,:].reshape((input_layer_size,1))
+   126   2991600   56021161.5     18.7     17.7                 a1 = np.vstack((1, a1))   #  +bias
+   127   2991600   15547670.0      5.2      4.9                 z2 = Theta1 @ a1
+   128   2991600   17983947.0      6.0      5.7                 a2 = g(z2)
+   129   2991600   50239840.9     16.8     15.8                 a2 = np.vstack((1, a2))   #  +bias
+   130   2991600   24634008.2      8.2      7.8                 a3 = g(Theta2 @ a2)
+   131
+   132                                                          # compute error for layer 3
+   133   2991600    3609045.4      1.2      1.1                 y_k = np.zeros((num_labels,1))
+   134   2991600   12625427.5      4.2      4.0                 y_k[y[t,0].astype(int)] = 1
+   135   2991600    4751357.1      1.6      1.5                 delta3 = a3 - y_k
+   136   2991600   11168757.1      3.7      3.5                 Delta2 += (delta3 @ a2.T)
+   137
+   138                                                          # compute error for layer 2
+   139   2991600   36612406.8     12.2     11.5                 delta2 = (Theta2[:,1:].T @ delta3) * grad_g(z2)
+   140   2991600   76346710.1     25.5     24.1                 Delta1 += (delta2 @ a1.T)
+ation
+   146      1108      49681.0     44.8      0.0         Theta1_grad[:,1:] += (lmbda/m) * Theta1[:,1:]
+   147      1108      12366.9     11.2      0.0         Theta2_grad[:,1:] += (lmbda/m) * Theta2[:,1:]
+   148
+   149                                                  # flatten gradients
+   150      1108      18740.8     16.9      0.0         grad = np.concatenate((Theta1_grad.flatten(), Theta2_grad.flatten()))
+   151
+   152      1108        494.3      0.4      0.0         return grad
+
+
+
+
+
+// line_profile for cost_fuction
+
+Timer unit: 1e-06 s
+
+Total time: 27.1152 s
+File: artificialneuralnetwork.py
+Function: cost_function at line 59
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    59                                           @profile
+    60                                           def cost_function(theta, input_layer_size, hidden_layer_size, num_labels, X, y, lmbda):
+    61                                        
+    73
+    74                                                  # unflatten theta
+    75      2310      20178.5      8.7      0.1         Theta1, Theta2 = reshape(theta, input_layer_size, hidden_layer_size, num_labels)
+    76
+    77                                                  # number of training values
+    78      2310       2533.5      1.1      0.0         m = len(y)
+    79
+    80                                                  # Feedforward: calculate the cost function J:
+    81
+    82      2310   21038277.4   9107.5     77.6         a1 = np.hstack((np.ones((m,1)), X))
+    83      2310    4464827.3   1932.8     16.5         a2 = g(a1 @ Theta1.T)
+    84      2310     217329.1     94.1      0.8         a2 = np.hstack((np.ones((m,1)), a2))
+    85      2310     308362.2    133.5      1.1         a3 = g(a2 @ Theta2.T)
+    86
+    87      2310     130822.7     56.6      0.5         y_mtx = 1.*(y==0)
+    88      6930      12373.4      1.8      0.0         for k in range(1,num_labels):
+    89      4620     341451.2     73.9      1.3                 y_mtx = np.hstack((y_mtx, 1.*(y==k)))
+    90
+    91                                                  # cost function
+    92      2310     445399.6    192.8      1.6         J = np.sum( -y_mtx * np.log(a3) - (1.0-y_mtx) * np.log(1.0-a3) ) / m
+    93
+    94                                                  # add regularization
+    95      2310     132605.4     57.4      0.5         J += lmbda/(2.*m) * (np.sum(Theta1[:,1:]**2)  + np.sum(Theta2[:,1:]**2))
+    96
+    97      2310       1032.3      0.4      0.0         return J
+
+
+
+// line_profile for predict function
+Timer unit: 1e-06 s
+
+Total time: 10.0863 s
+File: artificialneuralnetwork.py
+Function: predict at line 28
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    28                                           @profile
+    29                                           def predict(Theta1, Theta2, X):
+    30                                                  """ Predict labels in a trained three layer classification network.
+    31                                                  Input:
+    32                                                    Theta1       trained weights applied to 1st layer (hidden_layer_size x input_layer_size+1)
+    33                                                    Theta2       trained weights applied to 2nd layer (num_labels x hidden_layer_size+1)
+    34                                                    X            matrix of training data      (m x input_layer_size)
+    35                                                  Output:
+    36                                                    prediction   label prediction
+    37                                                  """
+    38
+    39      1203       9515.0      7.9      0.1         m = np.shape(X)[0]                    # number of training values
+    40      1203       4402.1      3.7      0.0         num_labels = np.shape(Theta2)[0]
+    41
+    42      1203    8078736.2   6715.5     80.1         a1 = np.hstack((np.ones((m,1)), X))   # add bias (input layer)
+    43      1203    1730925.4   1438.8     17.2         a2 = g(a1 @ Theta1.T)                 # apply sigmoid: input layer --> hidden layer
+    44      1203      92517.8     76.9      0.9         a2 = np.hstack((np.ones((m,1)), a2))  # add bias (hidden layer)
+    45      1203     102410.0     85.1      1.0         a3 = g(a2 @ Theta2.T)                 # apply sigmoid: hidden layer --> output layer
+    46
+    47      1203      67230.4     55.9      0.7         prediction = np.argmax(a3,1).reshape((m,1))
+    48      1203        595.8      0.5      0.0         return prediction
+
